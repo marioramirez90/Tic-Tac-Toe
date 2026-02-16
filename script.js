@@ -159,18 +159,27 @@ function showDialog(player) {
     dialog.style.background = "#fff";
     dialog.style.borderRadius = "15px";
     dialog.style.padding = "30px 40px";
-    dialog.style.textAlign = "center";
-    dialog.style.fontSize = "22px";
     dialog.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
     dialog.style.maxWidth = "300px";
+    dialog.style.width = "80%";
     dialog.style.color = "#333";
     dialog.style.fontWeight = "600";
 
-    dialog.innerText = player === 'draw' ? "Unentschieden!" : `Spieler ${player === 'circle' ? '1' : '2'} hat gewonnen!`;
+    // Flexbox für Text + Button
+    dialog.style.display = "flex";
+    dialog.style.flexDirection = "column";
+    dialog.style.alignItems = "center";
+    dialog.style.gap = "20px"; // Abstand zwischen Text und Button
 
+    // Text
+    const message = document.createElement("div");
+    message.style.fontSize = "22px";
+    message.style.textAlign = "center";
+    message.innerText = player === 'draw' ? "Unentschieden!" : `Spieler ${player === 'circle' ? '1' : '2'} hat gewonnen!`;
+
+    // Button
     const button = document.createElement("button");
     button.innerText = "OK";
-    button.style.marginTop = "20px";
     button.style.padding = "10px 20px";
     button.style.border = "none";
     button.style.background = "#00b0ef";
@@ -185,6 +194,8 @@ function showDialog(player) {
 
     button.onclick = () => location.reload();
 
+    // Alles zusammenfügen
+    dialog.appendChild(message);
     dialog.appendChild(button);
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
