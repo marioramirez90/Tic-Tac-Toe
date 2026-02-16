@@ -135,6 +135,40 @@ td:hover {
     pointer-events: none;
 }
 
-@media (max-width: 400px) {
-    td { width: 80px; height: 80px; }
+@media (max-width: 480px) {
+    /* Damit der Body auf dem Handy nicht versucht, alles krampfhaft in die Mitte zu quetschen */
+    body {
+        align-items: flex-start; /* Fängt oben an, statt in der Mitte */
+        padding: 0;
+    }
+
+    .game-container {
+        /* Volle Breite und keine Ränder */
+        width: 100%;
+        max-width: none;
+        
+        /* WICHTIG: Mindestens so hoch wie der Bildschirm */
+        min-height: 100vh; 
+        
+        /* Design-Anpassungen für Fullscreen-Look */
+        border-radius: 0;       /* Keine runden Ecken am Rand */
+        border: none;           /* Kein Rand mehr */
+        box-shadow: none;       /* Schatten weg, da es eh den ganzen Screen füllt */
+        margin: 0;
+        
+        /* Inhalt zentrieren */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Inhalt vertikal mittig im Fullscreen */
+    }
+
+    td {
+        /* Zellengröße etwas anpassen für kleine Screens */
+        width: 75px; 
+        height: 75px;
+    }
+
+    h1 {
+        margin-top: 0; /* Unnötigen Platz oben entfernen */
+    }
 }
