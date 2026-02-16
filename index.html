@@ -1,18 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic-Tac-Toe</title>
+    <title>Ultimate Tic Tac Toe</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
 </head>
-<body onload="render()">
-    <h1>TIC TAC TOE</h1>
-    <div id="container"></div>
+<body onload="init()">
+    <div class="background-blobs"></div>
+    
+    <div class="game-container">
+        <h1>TIC TAC TOE</h1>
 
+        <div id="board-wrapper">
+            <div id="container"></div>
+        </div>
 
+        <div class="scoreboard">
+            <div class="score-card" id="score-p1">
+                <span class="label">SPIELER 1</span>
+                <span class="points" id="points-1">0</span>
+            </div>
+            <div class="score-divider">:</div>
+            <div class="score-card" id="score-p2">
+                <span class="label">SPIELER 2</span>
+                <span class="points" id="points-2">0</span>
+            </div>
+        </div>
+
+        <p class="goal-text">Wer zuerst 3 Siege hat, gewinnt!</p>
+
+        <button class="reset-btn" onclick="resetFullGame()">MATCH RESET</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
-<script src="script.js"></script>
 </html>

@@ -1,16 +1,36 @@
-let fields = [
-    null, null, null,
-    null, null, null,
-    null, null, null,
-];
+let fields = [null, null, null, null, null, null, null, null, null];
+let currentPlayer = 'circle';
+let scores = { circle: 0, cross: 0 };
+let gameActive = true;
 
-let currentPlayer = 'circle'; // Spielerwechsel: circle → cross
+function init() {
+    render();
+    updateScoreDisplay();
+}
 
-function handleClick(index, td) {
-    if (fields[index]) return;
+function render() {
+    let html = "<table>";
+    for (let i = 0; i < 3; i++) {
+        html += "<tr>";
+        for (let j = 0; j < 3; j++) {
+            let index = i * 3 + j;
+            let symbol = "";
+            if (fields[index] === "circle") symbol = generateCircleSVG();
+            else if (fields[index] === "cross") symbol = generateCrossSVG();
+            html += `<td id="td-${index}" onclick="handleClick(${index})">${symbol}</td>`;
+        }
+        html += "</tr>";
+    }
+    html += "</table>";
+    document.getElementById("container").innerHTML = html;
+}
+
+function handleClick(index) {
+    if (fields[index] || !gameActive) return;
 
     fields[index] = currentPlayer;
-
+    const td = document.getElementById(`td-${index}`);
+    
     if (currentPlayer === 'circle') {
         td.innerHTML = generateCircleSVG();
         currentPlayer = 'cross';
@@ -19,184 +39,158 @@ function handleClick(index, td) {
         currentPlayer = 'circle';
     }
 
-    td.onclick = null;
-
     let result = checkWinner();
     if (result) {
-        drawWinningLine(result);
+        gameActive = false;
+        let roundMessage = "";
+
+        if (result.player !== 'draw') {
+            drawWinningLine(result);
+            scores[result.player]++;
+            updateScoreDisplay();
+            // Text für den Gewinner der Runde
+            roundMessage = (result.player === 'circle' ? "Spieler 1" : "Spieler 2") + " hat gewonnen!";
+        } else {
+            // Text für Unentschieden
+            roundMessage = "Unentschieden!";
+        }
+        
+        // Zeige das Pop-Up für die Runde
+        showRoundResult(roundMessage);
+
+        // Längere Pause (2000ms), damit man das Pop-Up lesen kann
         setTimeout(() => {
-            showDialog(result.player);
-        }, 600);
+            if (scores.circle === 3 || scores.cross === 3) {
+                showFinalWinner(result.player);
+            } else {
+                nextRound(result.player);
+            }
+        }, 2000);
     }
 }
 
-function render() {
-    let html = "<table>";
+// NEUE FUNKTION: Das temporäre Pop-Up für jede Runde
+function showRoundResult(text) {
+    const overlay = document.createElement("div");
+    overlay.id = "temp-result-overlay";
+    // Style passend zum restlichen Design
+    overlay.style = `
+        position: fixed; 
+        top: 15%; 
+        left: 50%; 
+        transform: translate(-50%, -50%); 
+        background: rgba(15, 23, 42, 0.95); 
+        padding: 15px 30px; 
+        border-radius: 15px; 
+        border: 1px solid var(--accent-blue); 
+        color: white; 
+        font-weight: bold; 
+        font-size: 18px; 
+        z-index: 1500; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        backdrop-filter: blur(5px);
+        animation: fadeIn 0.3s ease;
+    `;
+    overlay.innerText = text;
+    document.body.appendChild(overlay);
 
-    for (let i = 0; i < 3; i++) {
-        html += "<tr>";
-        for (let j = 0; j < 3; j++) {
-            let index = i * 3 + j;
-            let symbol = "";
+    // Löscht das Pop-Up automatisch kurz bevor die nächste Runde startet
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.5s';
+        setTimeout(() => {
+            if(overlay) overlay.remove();
+        }, 500);
+    }, 1500);
+}
 
-            if (fields[index] === "circle") symbol = generateCircleSVG();
-            else if (fields[index] === "cross") symbol = generateCrossSVG();
+function updateScoreDisplay() {
+    document.getElementById('points-1').innerText = scores.circle;
+    document.getElementById('points-2').innerText = scores.cross;
+}
 
-            html += `<td onclick="handleClick(${index}, this)">${symbol}</td>`;
-        }
-        html += "</tr>";
-    }
+function nextRound(winner) {
+    fields = [null, null, null, null, null, null, null, null, null];
+    gameActive = true;
+    const oldLine = document.querySelector('.winning-line');
+    if (oldLine) oldLine.remove();
+    // Falls das Overlay noch da sein sollte (Sicherheitsmaßnahme), entfernen
+    const oldOverlay = document.getElementById("temp-result-overlay");
+    if (oldOverlay) oldOverlay.remove();
+    
+    render();
+}
 
-    html += "</table>";
-    document.getElementById("container").innerHTML = html;
+function resetFullGame() {
+    scores = { circle: 0, cross: 0 };
+    updateScoreDisplay();
+    nextRound();
 }
 
 function generateCircleSVG() {
     return `
-        <svg width="70" height="70" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="40" fill="#00b0ef" transform="scale(0)" transform-origin="50 50">
-                <animateTransform attributeName="transform" type="scale" from="0" to="1" dur="0.6s" fill="freeze" />
+        <svg width="60" height="60" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="35" stroke="#00d2ff" stroke-width="10" fill="none" 
+                    stroke-dasharray="220" stroke-dashoffset="220">
+                <animate attributeName="stroke-dashoffset" from="220" to="0" dur="0.4s" fill="freeze" />
             </circle>
-            <circle cx="50" cy="50" r="40" stroke="#00b0ef" stroke-width="8" fill="none" opacity="0">
-                <animate attributeName="opacity" from="0" to="1" begin="0.6s" dur="0.2s" fill="freeze" />
-            </circle>
-        </svg>
-    `;
+        </svg>`;
 }
 
 function generateCrossSVG() {
     return `
-        <svg width="70" height="70" viewBox="0 0 100 100">
-            <line x1="20" y1="20" x2="80" y2="80" stroke="#FFC000" stroke-width="8" stroke-dasharray="84.85" stroke-dashoffset="84.85">
-                <animate attributeName="stroke-dashoffset" from="84.85" to="0" dur="0.5s" fill="freeze" />
+        <svg width="60" height="60" viewBox="0 0 100 100">
+            <line x1="25" y1="25" x2="75" y2="75" stroke="#ffc000" stroke-width="12" stroke-linecap="round" stroke-dasharray="100" stroke-dashoffset="100">
+                <animate attributeName="stroke-dashoffset" from="100" to="0" dur="0.3s" fill="freeze" />
             </line>
-            <line x1="80" y1="20" x2="20" y2="80" stroke="#FFC000" stroke-width="8" stroke-dasharray="84.85" stroke-dashoffset="84.85">
-                <animate attributeName="stroke-dashoffset" from="84.85" to="0" begin="0.5s" dur="0.5s" fill="freeze" />
+            <line x1="75" y1="25" x2="25" y2="75" stroke="#ffc000" stroke-width="12" stroke-linecap="round" stroke-dasharray="100" stroke-dashoffset="100">
+                <animate attributeName="stroke-dashoffset" from="100" to="0" begin="0.2s" dur="0.3s" fill="freeze" />
             </line>
-        </svg>
-    `;
+        </svg>`;
 }
 
-// Gewinner prüfen
 function checkWinner() {
-    const winPatterns = [
-        [0,1,2], [3,4,5], [6,7,8], // Reihen
-        [0,3,6], [1,4,7], [2,5,8], // Spalten
-        [0,4,8], [2,4,6]           // Diagonalen
-    ];
-
+    const winPatterns = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
     for (let pattern of winPatterns) {
         const [a, b, c] = pattern;
         if (fields[a] && fields[a] === fields[b] && fields[a] === fields[c]) {
             return { pattern, player: fields[a] };
         }
     }
-
-    if (!fields.includes(null)) {
-        return { pattern: null, player: 'draw' };
-    }
-
-    return null;
+    return fields.includes(null) ? null : { player: 'draw' };
 }
 
-// Gewinnlinie zeichnen
 function drawWinningLine(result) {
     if (!result.pattern) return;
-
     const container = document.getElementById("container");
-    const table = container.querySelector("table");
-    const tdElements = table.querySelectorAll("td");
+    const tdElements = container.querySelectorAll("td");
+    const first = tdElements[result.pattern[0]], last = tdElements[result.pattern[2]];
+    const r1 = first.getBoundingClientRect(), r2 = last.getBoundingClientRect(), cR = container.getBoundingClientRect();
     
-    const first = tdElements[result.pattern[0]];
-    const last = tdElements[result.pattern[2]];
-
+    const x1 = r1.left + r1.width/2 - cR.left, y1 = r1.top + r1.height/2 - cR.top;
+    const x2 = r2.left + r2.width/2 - cR.left, y2 = r2.top + r2.height/2 - cR.top;
+    
     const line = document.createElement("div");
-    line.style.position = "absolute";
-    line.style.background = "white";
-    line.style.height = "5px";
-    line.style.transformOrigin = "0 50%";
-    line.style.transition = "width 0.5s";
-
-    const rect1 = first.getBoundingClientRect();
-    const rect2 = last.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-
-    const x1 = rect1.left + rect1.width/2 - containerRect.left;
-    const y1 = rect1.top + rect1.height/2 - containerRect.top;
-    const x2 = rect2.left + rect2.width/2 - containerRect.left;
-    const y2 = rect2.top + rect2.height/2 - containerRect.top;
-
-    const length = Math.hypot(x2 - x1, y2 - y1);
-    const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
-
+    line.className = "winning-line";
+    const len = Math.hypot(x2-x1, y2-y1);
     line.style.width = "0px";
-    line.style.left = x1 + "px";
-    line.style.top = y1 + "px";
-    line.style.transform = `rotate(${angle}deg)`;
-
+    line.style.left = x1 + "px"; line.style.top = y1 + "px";
+    line.style.transform = `rotate(${Math.atan2(y2-y1, x2-x1) * 180 / Math.PI}deg)`;
+    line.style.transformOrigin = "0 50%";
     container.appendChild(line);
-
-    setTimeout(() => {
-        line.style.width = length + "px";
-    }, 50);
+    setTimeout(() => line.style.width = len + "px", 10);
 }
 
-// Stylischer Dialog
-function showDialog(player) {
+function showFinalWinner(player) {
+    const winnerName = player === 'circle' ? "SPIELER 1" : "SPIELER 2";
     const overlay = document.createElement("div");
-    overlay.style.position = "fixed";
-    overlay.style.top = 0;
-    overlay.style.left = 0;
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
-    overlay.style.background = "rgba(0,0,0,0.7)";
-    overlay.style.display = "flex";
-    overlay.style.justifyContent = "center";
-    overlay.style.alignItems = "center";
-    overlay.style.zIndex = 1000;
-
-    const dialog = document.createElement("div");
-    dialog.style.background = "#fff";
-    dialog.style.borderRadius = "15px";
-    dialog.style.padding = "30px 40px";
-    dialog.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
-    dialog.style.maxWidth = "300px";
-    dialog.style.width = "80%";
-    dialog.style.color = "#333";
-    dialog.style.fontWeight = "600";
-
-    // Flexbox für Text + Button
-    dialog.style.display = "flex";
-    dialog.style.flexDirection = "column";
-    dialog.style.alignItems = "center";
-    dialog.style.gap = "20px"; // Abstand zwischen Text und Button
-
-    // Text
-    const message = document.createElement("div");
-    message.style.fontSize = "22px";
-    message.style.textAlign = "center";
-    message.innerText = player === 'draw' ? "Unentschieden!" : `Spieler ${player === 'circle' ? '1' : '2'} hat gewonnen!`;
-
-    // Button
-    const button = document.createElement("button");
-    button.innerText = "OK";
-    button.style.padding = "10px 20px";
-    button.style.border = "none";
-    button.style.background = "#00b0ef";
-    button.style.color = "#fff";
-    button.style.fontSize = "18px";
-    button.style.borderRadius = "10px";
-    button.style.cursor = "pointer";
-    button.style.transition = "background 0.3s";
-
-    button.onmouseover = () => button.style.background = "#008ac7";
-    button.onmouseleave = () => button.style.background = "#00b0ef";
-
-    button.onclick = () => location.reload();
-
-    // Alles zusammenfügen
-    dialog.appendChild(message);
-    dialog.appendChild(button);
-    overlay.appendChild(dialog);
+    overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center; z-index:2000; backdrop-filter:blur(10px);";
+    overlay.innerHTML = `
+        <div style="background:#1e293b; padding:40px; border-radius:20px; text-align:center; border:2px solid var(--accent-blue);">
+            <h2 style="font-size:40px; margin:0; color:gold;">🏆 CHAMPION!</h2>
+            <p style="font-size:24px;">${winnerName} hat das Match gewonnen!</p>
+            <button onclick="location.reload()" style="background:var(--accent-blue); border:none; color:white; padding:15px 30px; border-radius:10px; cursor:pointer; font-weight:bold;">NEUES MATCH</button>
+        </div>
+    `;
     document.body.appendChild(overlay);
 }
