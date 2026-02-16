@@ -1,3 +1,4 @@
+/* Basis-Layout */
 body {
     margin: 0;
     background-color: #323232;
@@ -6,13 +7,27 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    display: flex;
     flex-direction: column;
     gap: 50px;
+    overflow: hidden; /* verhindert Scrollen */
+    text-align: center;
 }
 
+h1 {
+    margin: 0;
+    color: white;
+}
+
+/* Tabelle zentrieren */
+#container {
+    position: relative;
+    display: inline-block; /* zentriert die Tabelle horizontal */
+}
+
+/* Standard Zellen für Desktop */
 table {
     border-collapse: collapse;
+    margin: 0 auto; /* zentriert horizontal */
 }
 
 td {
@@ -23,31 +38,51 @@ td {
     font-weight: bold;
     cursor: pointer;
     color: white;
-}
-
-td:hover{
-    background-color: #dedddd4a;
-}
-
-
-/* Nur innere Linien */
-
-td {
     border-right: 5px solid white;
     border-bottom: 5px solid white;
 }
 
-/* rechte Außenlinie entfernen */
+td:hover {
+    background-color: #dedddd4a;
+}
 
+/* Außenlinien entfernen */
 td:nth-child(3) {
     border-right: none;
 }
 
-/* untere Außenlinie entfernen */
-
 tr:nth-child(3) td {
     border-bottom: none;
 }
-#container {
-    position: relative; /* für absolute Gewinnlinie */
+
+/* Mobile-Optimierung */
+@media only screen and (max-width: 600px) {
+    body {
+        gap: 20px;
+    }
+
+    #container {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    td {
+        width: 33.33%;  /* gleichmäßige Breite für 3 Spalten */
+        height: 0;
+        padding-bottom: 33.33%; /* quadratische Zellen */
+        font-size: 20px;
+    }
+
+    td svg {
+        width: 70%;
+        height: 70%;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
 }
