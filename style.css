@@ -25,6 +25,11 @@ td {
     color: white;
 }
 
+td:hover{
+    background-color: #dedddd4a;
+}
+
+
 /* Nur innere Linien */
 
 td {

@@ -1,14 +1,27 @@
 let fields = [
-    null,
-    null,
-    'circle',
-    null,
-    null,
-    'cross',
-    null,
-    null,
-    null,
+    null, null, null,
+    null, null, null,
+    null, null, null,
 ];
+
+let currentPlayer = 'circle'; // Spielerwechsel: circle → cross
+
+function handleClick(index, td) {
+    // Feld füllen
+    fields[index] = currentPlayer;
+
+    // HTML-Code einfügen
+    if (currentPlayer === 'circle') {
+        td.innerHTML = generateCircleSVG();
+        currentPlayer = 'cross'; // Nächster Spieler
+    } else {
+        td.innerHTML = generateCrossSVG();
+        currentPlayer = 'circle'; // Nächster Spieler
+    }
+
+    // Klick deaktivieren
+    td.onclick = null;
+}
 
 function render() {
     let html = "<table>";
@@ -22,13 +35,12 @@ function render() {
 
             if (fields[index] === "circle") {
                 symbol = generateCircleSVG();
+            } else if (fields[index] === "cross") {
+                symbol = generateCrossSVG();
             }
 
-            if (fields[index] === "cross") {
-                symbol = "X";
-            }
-
-            html += `<td>${symbol}</td>`;
+            // td mit onclick
+            html += `<td onclick="handleClick(${index}, this)">${symbol}</td>`;
         }
 
         html += "</tr>";
@@ -38,6 +50,7 @@ function render() {
 
     document.getElementById("container").innerHTML = html;
 }
+
 
 function generateCircleSVG() {
     return `
@@ -83,4 +96,42 @@ function generateCircleSVG() {
         </svg>
     `;
 }
+function generateCrossSVG() {
+    return `
+        <svg width="70" height="70" viewBox="0 0 100 100">
+
+            <!-- Erste Linie des X -->
+            <line x1="20" y1="20" x2="80" y2="80"
+                  stroke="#FFC000"
+                  stroke-width="8"
+                  stroke-dasharray="84.85"
+                  stroke-dashoffset="84.85">
+                <animate
+                    attributeName="stroke-dashoffset"
+                    from="84.85"
+                    to="0"
+                    dur="0.5s"
+                    fill="freeze" />
+            </line>
+
+            <!-- Zweite Linie des X -->
+            <line x1="80" y1="20" x2="20" y2="80"
+                  stroke="#FFC000"
+                  stroke-width="8"
+                  stroke-dasharray="84.85"
+                  stroke-dashoffset="84.85">
+                <animate
+                    attributeName="stroke-dashoffset"
+                    from="84.85"
+                    to="0"
+                    begin="0.5s"
+                    dur="0.5s"
+                    fill="freeze" />
+            </line>
+
+        </svg>
+    `;
+}
+
+
 
