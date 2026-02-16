@@ -48,3 +48,6 @@ td:nth-child(3) {
 tr:nth-child(3) td {
     border-bottom: none;
 }
+#container {
+    position: relative; /* für absolute Gewinnlinie */
+}
